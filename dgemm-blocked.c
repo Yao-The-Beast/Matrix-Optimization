@@ -33,15 +33,16 @@ void pack(double* dest, double* src, int offset, int width, int height, int lda)
   double* pointer_src = src + offset;
   double* pointer_dest = dest;
   for (int j = 0; j < width / 4; j++){
-    memcpy(pointer_dest, pointer_src, numBytes);
-    memcpy(pointer_dest + height, pointer_src + lda, numBytes);
-    memcpy(pointer_dest + (height << 1), pointer_src + (lda << 1), numBytes);
-    memcpy(pointer_dest + (height * 3), pointer_src + (lda * 3), numBytes);
+    //unrolling here to leverage on concurrent computation
+    memmove(pointer_dest, pointer_src, numBytes);
+    memmove(pointer_dest + height, pointer_src + lda, numBytes);
+    memmove(pointer_dest + (height << 1), pointer_src + (lda << 1), numBytes);
+    memmove(pointer_dest + (height * 3), pointer_src + (lda * 3), numBytes);
     pointer_dest  += (height << 2);
     pointer_src   += (lda << 2);
   }
   for (int j = (width / 4) * 4; j < width; j++){
-    memcpy(pointer_dest, pointer_src, numBytes);
+    memmove(pointer_dest, pointer_src, numBytes);
     pointer_dest  += height;
     pointer_src   += lda;
   }
